@@ -70,7 +70,7 @@ public class MainApp {
         }
     }
 
-    static boolean pos_neg2(int a) {
+    public static boolean pos_neg2(int a) {
         boolean result;
         result = a < 0;
         return result;
@@ -82,9 +82,8 @@ public class MainApp {
 
     public static void isleapYear(int a) {
         String result = "Невисокосный год";
-        if (a % 4 != 0 && a % 100 == 0 && a % 400 != 0) {
-            result = "Високосный год";
-        }
+        if (a % 4 == 0 && a % 100 != 0) { result = "Bисокосный год";}
+        else if (a % 400 ==0) { result = "Bисокосный год";}
         System.out.println("Год " + a + " : " + result);
     }
 }
