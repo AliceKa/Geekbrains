@@ -4,7 +4,6 @@ public class MainApp {
     // Task 1
     public static void main(String[] args) {
         // Task 2
-
         byte xByte = -120;
         short xShort = 12442;
         int xInt = 1000;
