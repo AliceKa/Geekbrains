@@ -14,16 +14,19 @@ public class MainApp {
         boolean bool = true;
         String j = "Hello";
 
-        int aInt = 21;
-        int bInt = 20;
-        int cInt = 10;
-        int dInt = 5;
+        float aFloat = 21;
+        float bFloat = 20;
+        float cFloat = 10;
+        float dFloat = 5;
 
         // Task 3
 
-        System.out.println("Результат Task 3: " + calculate(aInt,bInt,cInt,dInt));
+        System.out.println("Результат Task 3: " + calculate(aFloat,bFloat,cFloat,dFloat));
 
         // Task 4
+
+        int aInt = -10;
+        int bInt = 19;
 
         System.out.println("Результат Task 4: " + check(aInt,bInt));
 
@@ -46,8 +49,8 @@ public class MainApp {
 
     }
 
-    static int calculate(int a, int b, int c, int d) {
-        int result = a*(b+(c/d));
+    static float calculate(float a, float b, float c, float d) {
+        float result = a*(b+(c/d));
         return result;
     }
 
