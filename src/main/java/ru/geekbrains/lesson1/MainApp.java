@@ -32,7 +32,7 @@ public class MainApp {
 
         // Task 5
 
-        System.out.println("Результат Task 5: " + pos_neg(aInt));
+        pos_neg(aInt);
 
         // Task 6
         boolean check_pos_neg2 = pos_neg2(aInt);
@@ -44,31 +44,30 @@ public class MainApp {
 
         // Task 8
         int leapYear = 2000;
-        System.out.println(leapYear + " : " + year(leapYear));
+        isleapYear(leapYear);
 
 
     }
 
-    static float calculate(float a, float b, float c, float d) {
+    public static float calculate(float a, float b, float c, float d) {
         float result = a*(b+(c/d));
         return result;
     }
 
-    static boolean check(int a, int b) {
+    public static boolean check(int a, int b) {
         int summa = a+b;
         boolean result = (summa >= 10 && summa <=20);
         return result;
     }
 
-    static String pos_neg(int a) {
+    public static void pos_neg(int a) {
         String result;
         if (a >= 0) {
-            result = "Положительное";
+            System.out.println("Положительное число");
         }
         else {
-            result = "Отрицательное";
+            System.out.println("Отрицательное число");
         }
-        return result;
     }
 
     static boolean pos_neg2(int a) {
@@ -77,28 +76,15 @@ public class MainApp {
         return result;
     }
 
-    static String hello(String name) {
+    public static void hello(String name) {
         System.out.println("Привет, " + name + "!");
-        return null;
     }
 
-    static String year(int a) {
-        String result;
-        if (a % 4 == 0) {
-            if (a % 100 == 0) {
-                result = "Не високосный год";
-                if (a % 400 == 0) {
-                    result = "Високосный год";
-                }
-            }
-            else {
-                result = "Високосный год";
-            }
+    public static void isleapYear(int a) {
+        String result = "Невисокосный год";
+        if (a % 4 != 0 && a % 100 == 0 && a % 400 != 0) {
+            result = "Високосный год";
         }
-        else {
-            result = "Не високосный год";
-        }
-        return result;
+        System.out.println("Год " + a + " : " + result);
     }
-
 }
