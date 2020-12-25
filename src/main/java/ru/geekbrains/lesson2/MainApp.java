@@ -40,7 +40,7 @@ public class MainApp {
         int[][] arr3 = new int[5][5];
         for (int i= 0; i< arr3.length; i++){
             for (int j=0; j < arr3[i].length; j++){
-                if(i == j) {
+                if(i == j || i == arr3[i].length-j-1) {
                     arr3[i][j] = 1;
                 }
             }
