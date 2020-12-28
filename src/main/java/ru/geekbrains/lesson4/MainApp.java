@@ -59,8 +59,10 @@ public class MainApp {
         // mainShiftDiagonal("Right", symbol, MARGEN)
         return (checkRows(symbol) ||
                 checkColumns(symbol) ||
-                mainShiftDiagonal("Left", symbol, -MARGEN) ||
-                mainShiftDiagonal("Right", symbol, MARGEN) );
+                mainShiftDiagonal("Left", symbol, MARGEN) ||
+                mainShiftDiagonal("Right", symbol, MARGEN) ||
+                secondShiftDiagonal("Left", symbol, MARGEN) ||
+                secondShiftDiagonal("Right", symbol, MARGEN));
     }
 
     private static boolean checkRows(char symbol) {
@@ -105,14 +107,15 @@ public class MainApp {
 
     private static boolean mainShiftDiagonal(String method, char symbol, int distance) {
         int result = 0;
+        int multiplier = 1;
+        if (method == "Left") multiplier = -1;
         for (int dist = 0; dist <=distance; dist ++) {
-            if (distance < 0 && dist!=0) dist = -1;
             int counterChecker = 0;
-            for (int i = 0; i <SIZE-1; i++) {
+            for (int i = 0; i <SIZE; i++) {
                 if (i == 0 && method == "Left" && dist != 0) continue;
                 else if (i==SIZE-1 && method =="Right" && dist !=0) continue;
                 else {
-                    if (map[i][i+dist] == symbol) {
+                    if (map[i][i+dist*multiplier] == symbol) {
                         counterChecker++;
                     }
                     else {
@@ -127,24 +130,33 @@ public class MainApp {
         }
         return result == 1;
     }
-    /*
+
     private static boolean secondShiftDiagonal(String method, char symbol, int distance) {
-        for (int dist = 0; dist < distance; dist ++) {
+        int multiplier = 1;
+        int result = 0;
+        if (method == "Left") multiplier = -1;
+        for (int dist = 0; dist <= distance; dist ++) {
             int counterChecker = 0;
             for (int i = 0; i < SIZE; i++) {
-                if (map[i][SIZE-i-dist] == symbol) {
-                    counterChecker++;
-                }
+                if (i == 0 && method == "Right" && dist != 0) continue;
+                else if (i==SIZE-1 && method =="Left" && dist !=0) continue;
                 else {
-                    counterChecker = 0;
-                }
-                if (counterChecker == CELLS) {
-                    return true;
+                    if (map[i][SIZE-1-i+dist*multiplier] == symbol) {
+                        counterChecker++;
+                    }
+                    else {
+                        counterChecker = 0;
+                    }
+                    if (counterChecker == CELLS) {
+                        result++;
+                        break;
+                    }
                 }
             }
-        return false;
+        }
+        return result == 1;
     }
-    */
+
     private static void computerTurn() {
         int rowIndex = -1;
         int colIndex = -1;
