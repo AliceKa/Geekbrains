@@ -23,11 +23,21 @@ public class MainApp {
             humanTurn();
             printMap();
             if (checkEndGame(DOT_X)) break;
-            computerTurn();
+            randomComputerTurn();
             printMap();
             if (checkEndGame(DOT_0)) break;
         }
     }
+
+    private static void checkNextStep() {
+
+        for (int rowIndex = 0; rowIndex < SIZE; rowIndex++) {
+            for (int colIndex = 0; colIndex < SIZE ; colIndex++) {
+                map[rowIndex][colIndex] = DOT_EMPTY;
+            }
+        }
+    }
+
 
     private static boolean checkEndGame(char symbol) {
         if (checkWin(symbol)) {
@@ -53,10 +63,6 @@ public class MainApp {
     }
 
     private static boolean checkWin(char symbol) {
-        //secondShiftDiagonal("Left", symbol, MARGEN) ||
-        //secondShiftDiagonal("Right", symbol, MARGEN))
-        // mainShiftDiagonal("Left", symbol, MARGEN) ||
-        // mainShiftDiagonal("Right", symbol, MARGEN)
         return (checkRows(symbol) ||
                 checkColumns(symbol) ||
                 mainShiftDiagonal("Left", symbol, MARGEN) ||
@@ -157,12 +163,12 @@ public class MainApp {
         return result == 1;
     }
 
-    private static void computerTurn() {
+    private static void randomComputerTurn() {
         int rowIndex = -1;
         int colIndex = -1;
         Random rand = new Random();
         do {
-            rowIndex = rand.nextInt(SIZE); // [0:3)
+            rowIndex = rand.nextInt(SIZE);
             colIndex = rand.nextInt(SIZE);
         } while (!isCellValid(rowIndex, colIndex));
 
