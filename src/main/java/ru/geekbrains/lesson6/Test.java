@@ -10,6 +10,7 @@ public class Test {
         cat2.limitRun = 150;
         dog1.limitRun = 500;
 
+        System.out.println("Summary:");
         System.out.print("(Cat 1) With limit: "+ cat1.limitRun + " result for 180 meters ");
         cat1.run(180);
         System.out.print("(Cat 2) With limit: "+ cat2.limitRun + " result for 180 meters ");
