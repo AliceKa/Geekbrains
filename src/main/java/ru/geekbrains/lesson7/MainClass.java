@@ -10,12 +10,13 @@ public class MainClass {
         Plate plate = new Plate(100);
         Cat[] catsArray = new Cat[4];
         for (int i = 0; i<4; i++) {
-            catsArray[i] = new Cat("Cat"+i, r.nextInt(130));
+            catsArray[i] = new Cat("Cat"+i, r.nextInt(2));
         }
         for (Cat cat : catsArray) {
             System.out.println("---- " + cat.name + " ----");
             step(cat,plate);
         }
+
     }
     public static void step(Cat cat, Plate plate) {
         Scanner sc = new Scanner(System.in);

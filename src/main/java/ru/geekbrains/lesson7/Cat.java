@@ -3,7 +3,7 @@ package ru.geekbrains.lesson7;
 public class Cat {
     protected String name;
     protected int appetite;
-    protected boolean fullness;
+    protected boolean fullness = true;
 
     public Cat(String name, int appetite) {
         this.name = name;
