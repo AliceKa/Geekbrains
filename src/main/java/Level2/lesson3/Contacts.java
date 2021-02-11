@@ -23,13 +23,5 @@ public class Contacts{
         return surname;
     }
 
-    public String toString() {
-        return surname + " / " + phoneNumber;
-    }
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Contacts contact = (Contacts) o;
-        return Objects.equals(surname, contact.surname) && Objects.equals(phoneNumber, contact.phoneNumber);
-    }
+
 }
