@@ -78,10 +78,15 @@ public class Frame implements ActionListener{
         else {
             System.out.println("Enter clicked");
         }
-        chatBox.append(formatter.format(date) + " < YOU >: " + messageBox.getText() + "\n");
-        responseRobot();
-        messageBox.setText("");
-        messageBox.requestFocusInWindow();
+        if (messageBox.getText().length() != 0) {
+            chatBox.append(formatter.format(date) + " < YOU >: " + messageBox.getText() + "\n");
+            responseRobot();
+            messageBox.setText("");
+            messageBox.requestFocusInWindow();
+        }
+        else {
+            System.out.println("Null");
+        }
     }
 
     public void responseRobot() {
