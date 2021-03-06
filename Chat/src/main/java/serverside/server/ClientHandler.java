@@ -1,25 +1,23 @@
 package serverside.server;
 
-import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.Time;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalTime;
 
 public class ClientHandler {
 
-    private MyServer myServer;
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    private final MyServer myServer;
+    private final Socket socket;
+    private final DataInputStream dis;
+    private final DataOutputStream dos;
 
     private String name;
     private boolean isAuthorized;
     private boolean isActive;
+    private boolean startTimer;
 
     public ClientHandler(MyServer myServer, Socket socket) throws IOException {
         try {
@@ -29,51 +27,40 @@ public class ClientHandler {
             this.dos = new DataOutputStream(socket.getOutputStream());
             this.name = "";
 
-            Thread t1 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println("Thread 1");
+            Thread t1 = new Thread(() -> {
+                System.out.println("Thread 1");
+                try {
+                    authentication();
+                    readMessage();
+                } catch (IOException | InterruptedException ignored) {
+                } finally {
                     try {
-                        System.out.println(Instant.now());
-                        authentication();
-                        readMessage();
-                    } catch (IOException | InterruptedException ignored) {
-                    } finally {
-                        try {
-                            closeConnection();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        closeConnection();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });
 
 
-            Thread t2 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println("Thread 2");
+            Thread t2 = new Thread(() -> {
+                System.out.println("Thread 2");
+                try {
+                    Thread.sleep(20000);
+                    System.out.println(Instant.now());
+                } catch (InterruptedException ignored) {
+                }
+                if (!isAuthorized) {
                     try {
-                        Thread.sleep(20000);
-                        System.out.println(Instant.now());
-                    } catch (InterruptedException ignored) {
-                    }
-                    if (!isAuthorized) {
-                        try {
-                            closeConnection();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        closeConnection();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });
 
             t1.start();
             t2.start();
-
-
-
-
         } catch (IOException e) {
             closeConnection();
             throw new RuntimeException("Problems with ClientHandler");
@@ -110,15 +97,36 @@ public class ClientHandler {
             }
         }
         sendMessage("/end");
-        return;
     }
 
     public void readMessage() throws IOException, InterruptedException {
         if (isAuthorized) {
-            while (true) {
+            new Thread(()->{
+                t1: while (isAuthorized) {
+                    Instant start = Instant.now();
+                    while (!isActive) {
+                        Instant end = Instant.now();
+                        long dif = Duration.between(start,end).toSeconds();
+                        if (dif == 10) {
+                            try {
+                                sendMessage("WARNING! You have been logged out due to inactivity");
+                                isAuthorized = false;
+                                break t1;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }).start();
+
+
+            while (isAuthorized) {
                 isActive = false;
+                System.out.println("is inactive");
                 String messageFromClient = dis.readUTF();
                 System.out.println(name + " sent message " + messageFromClient);
+                System.out.println("active again");
                 isActive = true;
                 if (messageFromClient.startsWith("/")) {
                     if (messageFromClient.equals("/end")) {
@@ -144,22 +152,10 @@ public class ClientHandler {
                 else {
                     myServer.broadcastMessage(name + ": " + messageFromClient);
                 }
-                timerClose();
             }
-        } else {
-            return;
-        }
-
-    }
-
-    public void timerClose() throws InterruptedException, IOException {
-        System.out.println("Entered to timer");
-        Thread.sleep(10000);
-        if (!isActive) {
-            System.out.println("End");
-            closeConnection();
         }
     }
+
     public void sendMessage(String message) throws IOException {
         dos.writeUTF(message);
     }
