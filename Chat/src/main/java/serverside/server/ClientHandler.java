@@ -106,8 +106,8 @@ public class ClientHandler {
                     Instant start = Instant.now();
                     while (!isActive) {
                         Instant end = Instant.now();
-                        long dif = Duration.between(start,end).toSeconds();
-                        if (dif == 10) {
+                        long dif = Duration.between(start,end).toMinutes();
+                        if (dif == 3) {
                             try {
                                 sendMessage("WARNING! You have been logged out due to inactivity");
                                 isAuthorized = false;
