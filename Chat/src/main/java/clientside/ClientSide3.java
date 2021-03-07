@@ -48,12 +48,12 @@ public class ClientSide3 extends JFrame{
                                 while (true) {
                                     String strFromServer = in.readUTF();
                                     frame.chatBox.append(strFromServer + "\n");
-                                    if (strFromServer.startsWith("/end")) {
+                                    if (strFromServer.equals("/end")) {
                                         break;
                                     }
                                 }
                             }
-                            if (messageFromServer.startsWith("/end")) {
+                            if (messageFromServer.equals("/end")) {
                                 LoginFrame.frame.dispose();
                                 break;
                             }

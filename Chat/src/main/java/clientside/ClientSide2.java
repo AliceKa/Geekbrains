@@ -16,7 +16,6 @@ public class ClientSide2 extends JFrame{
     private DataInputStream in;
     private DataOutputStream out;
     private GUIclasses.LoginFrame LoginFrame;
-    private ChatBoxGui frame;
     boolean isAuthorized = false;
 
 
@@ -49,12 +48,12 @@ public class ClientSide2 extends JFrame{
                                 while (true) {
                                     String strFromServer = in.readUTF();
                                     frame.chatBox.append(strFromServer + "\n");
-                                    if (strFromServer.startsWith("/end")) {
+                                    if (strFromServer.equals("/end")) {
                                         break;
                                     }
                                 }
                             }
-                            if (messageFromServer.startsWith("/end")) {
+                            if (messageFromServer.equals("/end")) {
                                 LoginFrame.frame.dispose();
                                 break;
                             }
