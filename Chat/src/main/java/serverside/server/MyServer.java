@@ -23,7 +23,7 @@ public class MyServer {
         try (ServerSocket server = new ServerSocket(PORT)) {
             authService = new BaseAuthService();
             authService.start();
-            clients = new ArrayList<>();
+            clients = new ArrayList<ClientHandler>();
             while (true) {
                 System.out.println("Server waiting for connection...");
                 Socket socket = server.accept();
@@ -78,5 +78,9 @@ public class MyServer {
             }
         }
         client.sendMessage(sb.toString());
+    }
+
+    public synchronized void changeNick(String newNick, String name) {
+        authService.changeNick(newNick, name);
     }
 }
