@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -32,7 +33,7 @@ public class ClientHandler {
                 try {
                     authentication();
                     readMessage();
-                } catch (IOException | InterruptedException ignored) {
+                } catch (IOException | InterruptedException | SQLException | ClassNotFoundException ignored) {
                 } finally {
                     try {
                         closeConnection();
@@ -68,7 +69,7 @@ public class ClientHandler {
     }
 
 
-    public void authentication() throws IOException {
+    public void authentication() throws IOException, SQLException, ClassNotFoundException {
         int counter = 0;
         while (counter < 3) {
             String str = dis.readUTF();
@@ -134,12 +135,12 @@ public class ClientHandler {
                         return;
                     }
                     if (messageFromClient.startsWith("/w")) {
-                        char[] arr1 = messageFromClient.toCharArray();
-                        String nameReceiver = new String(arr1, 3,5);
-                        String messageToDirect = name + ": " + new String(arr1,9,arr1.length - 9);
+                        String[] arr1 = messageFromClient.split(" ", 3);
+                        String nameReceiver = arr1[1];
+                        String messageToDirect = name + ": " + arr1[2];
                         if (myServer.isNicknameBusy(nameReceiver)) {
                             myServer.directedMessage(messageToDirect, nameReceiver);
-                            String messageToDirect1 = "to " + nameReceiver + " : " + new String(arr1,9,arr1.length - 9);
+                            String messageToDirect1 = "to " + nameReceiver + " : " + arr1[2];
                             myServer.directedMessage(messageToDirect1, name);
                         } else {
                             myServer.directedMessage("The user with the nick " + nameReceiver + " is not available", name);
@@ -147,6 +148,14 @@ public class ClientHandler {
                     }
                     if (messageFromClient.startsWith("/list")) {
                         myServer.broadcastClientsList(this);
+                    }
+
+                    if (messageFromClient.startsWith("/changeNick")) {
+                        char[] arr1 = messageFromClient.toCharArray();
+                        String newNick = new String(arr1, 12,arr1.length-12);
+                        myServer.changeNick(newNick,name);
+                        myServer.broadcastMessage("The user with the nick " + name + " changed nick to " + newNick);
+                        name = newNick;
                     }
                 }
                 else {
