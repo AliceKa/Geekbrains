@@ -1,8 +1,6 @@
 package serverside.server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -18,7 +16,8 @@ public class ClientHandler {
     private String name;
     private boolean isAuthorized;
     private boolean isActive;
-    private boolean startTimer;
+
+    private String fileName;
 
     public ClientHandler(MyServer myServer, Socket socket) throws IOException {
         try {
@@ -29,7 +28,6 @@ public class ClientHandler {
             this.name = "";
 
             Thread t1 = new Thread(() -> {
-                System.out.println("Thread 1");
                 try {
                     authentication();
                     readMessage();
@@ -45,7 +43,6 @@ public class ClientHandler {
 
 
             Thread t2 = new Thread(() -> {
-                System.out.println("Thread 2");
                 try {
                     Thread.sleep(20000);
                     System.out.println(Instant.now());
@@ -79,10 +76,14 @@ public class ClientHandler {
                 String nick = myServer
                         .getAuthService()
                         .getNickByLoginAndPassword(arr[1], arr[2]);
+                fileName = myServer
+                        .getAuthService()
+                        .getFileNameByLoginAndPassword(arr[1], arr[2]);
                 if (nick != null) {
                     if (!myServer.isNicknameBusy(nick)) {
                         isAuthorized = true;
-                        sendMessage("User " + nick + " successfully logged in");
+                        sendMessage("User (" + nick + ") successfully logged in");
+                        showFromFile();
                         name = nick;
                         myServer.broadcastMessage(name + " joined the chat");
                         myServer.subscribe(this);
@@ -124,10 +125,8 @@ public class ClientHandler {
 
             while (isAuthorized) {
                 isActive = false;
-                System.out.println("is inactive");
                 String messageFromClient = dis.readUTF();
                 System.out.println(name + " sent message " + messageFromClient);
-                System.out.println("active again");
                 isActive = true;
                 if (messageFromClient.startsWith("/")) {
                     if (messageFromClient.equals("/end")) {
@@ -167,6 +166,28 @@ public class ClientHandler {
 
     public void sendMessage(String message) throws IOException {
         dos.writeUTF(message);
+        saveInFile(fileName, message);
+        myServer.saveInFile100(message);
+    }
+
+    public void showFromFile() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("chatserver.txt"))) {
+            String str;
+            while ((str = reader.readLine()) != null) {
+                str = "(Archive) " + str;
+                dos.writeUTF(str);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveInFile(String file, String message) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            writer.write(message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void closeConnection() throws IOException {
