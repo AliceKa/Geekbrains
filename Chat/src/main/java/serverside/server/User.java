@@ -8,6 +8,7 @@ public class User {
     private String login;
     private String password;
     private String nick;
+    private String fileName;
 
     public int getId() {
         return id;
@@ -25,6 +26,8 @@ public class User {
         return password;
     }
 
+    public String getFileName() { return fileName; }
+
     @Override
     public String toString() {
         return "User{" +
@@ -32,6 +35,7 @@ public class User {
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 ", nick='" + nick + '\'' +
+                ", fileName='" + fileName + '\'' +
                 '}';
     }
 
@@ -41,6 +45,7 @@ public class User {
             this.login = set.getString(2);
             this.password = set.getString(3);
             this.nick = set.getString(4);
+            this.fileName = set.getString(5);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
