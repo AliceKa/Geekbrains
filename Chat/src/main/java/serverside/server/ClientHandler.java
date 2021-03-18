@@ -5,6 +5,8 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
 
@@ -27,38 +29,65 @@ public class ClientHandler {
             this.dos = new DataOutputStream(socket.getOutputStream());
             this.name = "";
 
-            Thread t1 = new Thread(() -> {
-                try {
-                    authentication();
-                    readMessage();
-                } catch (IOException | InterruptedException | SQLException | ClassNotFoundException ignored) {
-                } finally {
+            ExecutorService executorService = Executors.newFixedThreadPool(3);
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
                     try {
-                        closeConnection();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        authentication();
+                        readMessage();
+                    } catch (IOException | InterruptedException | SQLException | ClassNotFoundException ignored) {
+                    } finally {
+                        try {
+                            closeConnection();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
 
 
-            Thread t2 = new Thread(() -> {
-                try {
-                    Thread.sleep(20000);
-                    System.out.println(Instant.now());
-                } catch (InterruptedException ignored) {
-                }
-                if (!isAuthorized) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
                     try {
-                        closeConnection();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        Thread.sleep(20000);
+                    } catch (InterruptedException ignored) {
+                    }
+                    if (!isAuthorized) {
+                        try {
+                            closeConnection();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
 
-            t1.start();
-            t2.start();
+
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        Instant start = Instant.now();
+                        while (!isActive && isAuthorized) {
+                            Instant end = Instant.now();
+                            long dif = Duration.between(start, end).toMinutes();
+                            if (dif == 3) {
+                                try {
+                                    sendMessage("WARNING! You have been logged out due to inactivity");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                isAuthorized = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+
         } catch (IOException e) {
             closeConnection();
             throw new RuntimeException("Problems with ClientHandler");
@@ -102,64 +131,42 @@ public class ClientHandler {
     }
 
     public void readMessage() throws IOException, InterruptedException {
-        if (isAuthorized) {
-            new Thread(()->{
-                t1: while (isAuthorized) {
-                    Instant start = Instant.now();
-                    while (!isActive) {
-                        Instant end = Instant.now();
-                        long dif = Duration.between(start,end).toMinutes();
-                        if (dif == 3) {
-                            try {
-                                sendMessage("WARNING! You have been logged out due to inactivity");
-                                isAuthorized = false;
-                                break t1;
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+        while (isAuthorized) {
+            isActive = false;
+            String messageFromClient = dis.readUTF();
+            System.out.println(name + " sent message " + messageFromClient);
+            isActive = true;
+            if (messageFromClient.startsWith("/")) {
+                if (messageFromClient.equals("/end")) {
+                    sendMessage("/end");
+                    return;
+                }
+                if (messageFromClient.startsWith("/w")) {
+                    String[] arr1 = messageFromClient.split(" ", 3);
+                    String nameReceiver = arr1[1];
+                    String messageToDirect = name + ": " + arr1[2];
+                    if (myServer.isNicknameBusy(nameReceiver)) {
+                        myServer.directedMessage(messageToDirect, nameReceiver);
+                        String messageToDirect1 = "to " + nameReceiver + " : " + arr1[2];
+                        myServer.directedMessage(messageToDirect1, name);
+                    } else {
+                        myServer.directedMessage("The user with the nick " + nameReceiver + " is not available", name);
                     }
                 }
-            }).start();
-
-
-            while (isAuthorized) {
-                isActive = false;
-                String messageFromClient = dis.readUTF();
-                System.out.println(name + " sent message " + messageFromClient);
-                isActive = true;
-                if (messageFromClient.startsWith("/")) {
-                    if (messageFromClient.equals("/end")) {
-                        sendMessage("/end");
-                        return;
-                    }
-                    if (messageFromClient.startsWith("/w")) {
-                        String[] arr1 = messageFromClient.split(" ", 3);
-                        String nameReceiver = arr1[1];
-                        String messageToDirect = name + ": " + arr1[2];
-                        if (myServer.isNicknameBusy(nameReceiver)) {
-                            myServer.directedMessage(messageToDirect, nameReceiver);
-                            String messageToDirect1 = "to " + nameReceiver + " : " + arr1[2];
-                            myServer.directedMessage(messageToDirect1, name);
-                        } else {
-                            myServer.directedMessage("The user with the nick " + nameReceiver + " is not available", name);
-                        }
-                    }
-                    if (messageFromClient.startsWith("/list")) {
-                        myServer.broadcastClientsList(this);
-                    }
-
-                    if (messageFromClient.startsWith("/changeNick")) {
-                        char[] arr1 = messageFromClient.toCharArray();
-                        String newNick = new String(arr1, 12,arr1.length-12);
-                        myServer.changeNick(newNick,name);
-                        myServer.broadcastMessage("The user with the nick " + name + " changed nick to " + newNick);
-                        name = newNick;
-                    }
+                if (messageFromClient.startsWith("/list")) {
+                    myServer.broadcastClientsList(this);
                 }
-                else {
-                    myServer.broadcastMessage(name + ": " + messageFromClient);
+
+                if (messageFromClient.startsWith("/changeNick")) {
+                    char[] arr1 = messageFromClient.toCharArray();
+                    String newNick = new String(arr1, 12,arr1.length-12);
+                    myServer.changeNick(newNick,name);
+                    myServer.broadcastMessage("The user with the nick " + name + " changed nick to " + newNick);
+                    name = newNick;
                 }
+            }
+            else {
+                myServer.broadcastMessage(name + ": " + messageFromClient);
             }
         }
     }
@@ -201,7 +208,6 @@ public class ClientHandler {
             socket.close();
         } catch (IOException ignored) {
         }
-        System.out.println("Finish");
     }
 
     public String getName() {

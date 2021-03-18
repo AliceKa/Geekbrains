@@ -35,7 +35,6 @@ public class MyServer {
             while (true) {
                 System.out.println("Server waiting for connection...");
                 Socket socket = server.accept();
-                System.out.println(socket.getInetAddress().getCanonicalHostName());
                 System.out.println("Client connected");
                 new ClientHandler(this, socket);
             }
@@ -116,7 +115,6 @@ public class MyServer {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileNew))) {
             while (fileScanner.hasNext()) {
                 String line = fileScanner.nextLine();
-                System.out.println(line);
                 writer.write(line + "\n");
             }
         } catch (IOException e) {
