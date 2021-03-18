@@ -40,6 +40,7 @@ public class ClientHandler {
                     } finally {
                         try {
                             closeConnection();
+                            executorService.shutdownNow();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
