@@ -11,7 +11,7 @@ import java.io.IOException;
 public class LoginFrame extends JFrame implements ActionListener {
 
     private JLabel l1, l2, l3;
-    public Frame frame;
+    public JFrame frame;
     protected JTextField tf1;
     protected JButton btn1;
     protected JPasswordField p1;
@@ -51,6 +51,8 @@ public class LoginFrame extends JFrame implements ActionListener {
         frame.setSize(500, 300);
         frame.setLayout(null);
         frame.setVisible(true);
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     }
 

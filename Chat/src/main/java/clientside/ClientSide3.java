@@ -38,7 +38,7 @@ public class ClientSide3 extends JFrame{
                 @Override
                 public void run() {
                     try {
-                        while (true) {
+                        t1: while (true) {
                             String messageFromServer = in.readUTF();
                             if (messageFromServer.startsWith("User")) {
                                 isAuthorized = true;
@@ -49,15 +49,17 @@ public class ClientSide3 extends JFrame{
                                     String strFromServer = in.readUTF();
                                     frame.chatBox.append(strFromServer + "\n");
                                     if (strFromServer.equals("/end")) {
-                                        break;
+                                        frame.newFrame.dispose();
+                                        break t1;
                                     }
                                 }
                             }
                             if (messageFromServer.equals("/end")) {
                                 LoginFrame.frame.dispose();
-                                break;
+                                break t1;
                             }
                         }
+                        //System.out.println("[ClientSide] Finished ");
                     } catch (IOException ignored) {
                     }
                 }
@@ -70,16 +72,6 @@ public class ClientSide3 extends JFrame{
         }
     }
 
-    /*public void onAuthClick() {
-        try {
-            out.writeUTF("/auth " + " " + loginField.getText() + " "+ passwordField.getText());
-            loginField.setText("");
-            passwordField.setText("");
-        } catch (IOException ignored) {
-        }
-    }
-
-     */
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {

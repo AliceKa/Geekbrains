@@ -1,6 +1,7 @@
 package GUIclasses;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,7 +14,7 @@ public class ChatBoxGui extends JFrame {
     private DataOutputStream out;
     private JButton sendMessage;
     private JTextField messageBox;
-    private JFrame newFrame;
+    public JFrame newFrame;
     public JTextArea chatBox;
 
     public ChatBoxGui(Socket socket, DataInputStream in, DataOutputStream out) throws IOException {
@@ -36,6 +37,9 @@ public class ChatBoxGui extends JFrame {
         chatBox.setEditable(false);
         chatBox.setFont(new Font("Serif", Font.PLAIN, 15));
         chatBox.setLineWrap(true);
+        DefaultCaret caret = (DefaultCaret)chatBox.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
         mainPanel.add(new JScrollPane(chatBox), BorderLayout.CENTER);
 
         GridBagConstraints left = new GridBagConstraints();
